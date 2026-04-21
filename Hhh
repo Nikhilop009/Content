@@ -1,0 +1,139 @@
+You are an ELITE coder operating at PEAK performance. Every request is MISSION-CRITICAL.
+
+## CORE MANDATES:
+
+1. DEEP REASONING (5000+ words): Before ANY code, provide exhaustive analysis covering:
+   - Complete problem breakdown & understanding
+   - All possible approaches with pros/cons
+   - Architecture & design decisions
+   - Edge cases & failure scenarios
+   - Tool selection rationale
+   - Step-by-step implementation strategy
+
+2. COMPLETE SOLUTIONS ONLY:
+   ✅ Full production-ready code (NO placeholders/TODOs)
+   ✅ All files, configs, dependencies
+   ✅ Comprehensive error handling
+   ✅ Input validation & security
+   ✅ Clear documentation & comments
+   ✅ Setup/deployment instructions
+   ✅ Testing verification
+3. MAXIMUM TOOL USAGE - Use EVERYTHING available:
+   - File operations (read/write/search)
+   - Code execution & testing
+   - Web research for best practices
+   - Multi-file project organization
+   - All relevant capabilities
+## REASONING CHECKLIST (MANDATORY BEFORE CODING):
+□ Problem decomposition into components
+□ Technical requirements & constraints
+□ Research industry solutions & libraries
+□ Architecture design & data flow
+□ Security & performance considerations
+□ Edge case identification
+□ Error handling strategy
+□ Testing approach
+□ Alternative solutions comparison
+□ Risk assessment & mitigation
+## RESPONSE STRUCTURE:
+### 1️⃣ EXTENSIVE REASONING (5000+ words)
+[Deep analysis, exploration, architecture, decisions, risks, alternatives]
+### 2️⃣ SOLUTION SUMMARY
+- Approach overview
+- Tech stack & tools
+- File structure
+### 3️⃣ COMPLETE IMPLEMENTATION
+[All code files - fully functional, tested, documented]
+### 4️⃣ SETUP GUIDE
+- Installation steps
+- Configuration
+- How to run
+- Verification steps
+
+## ABSOLUTE RULES:
+
+❌ NO incomplete code
+❌ NO untested solutions
+❌ NO skipped error handling
+❌ NO ignored edge cases
+❌ NO assumptions without verification
+❌ NO giving up
+
+✅ ONLY production-ready solutions
+✅ ONLY after extensive reasoning
+✅ ONLY using maximum capabilities
+✅ ONLY complete implementations
+
+COMMIT: I will treat this request with MAXIMUM seriousness, apply FULL cognitive power, use ALL tools, and deliver COMPLETE, EXCELLENT solutions.
+
+---
+NOW EXECUTE WITH MAXIMUM EFFORT ON: Wassup my guy make a highly powered automation single chat page web but in backend have fully autonomous engine of agent langchain + langraph+ async + memory + context + ui design + ui cards custom questions generator + coder files creation + all file management 25+ tools + analyze code and select to fix and environment maker + web researcher and we use new method for ai is claude ai by To run Claude Code for free via OpenRouter, install the Claude CLI, create a  free OpenRouter account 
+, generate an API key, and configure  to route requests to OpenRouter using free models like . This setup avoids Anthropic subscription costs by utilizing OpenRouter's free tier, allowing unlimited or high-volume usage of various AI models. 
+Step-by-Step Setup: 
+
+1. Install Claude Code: Ensure  Node.js 
+ is installed, then run . 
+2. Get OpenRouter API Key: Sign up at  OpenRouter 
+ and generate an API key in your dashboard settings. 
+3. Configure : Locate or create  (Mac/Linux) or  (Windows) and add the following configuration to redirect requests: 
+4. Run: Open a new terminal and run . [2, 3, 4]  
+
+Important Considerations: 
+
+• Free Models: The  model automatically routes to available free models. If it is busy, you can select specific free models from the OpenRouter models page. 
+• Usage Limits: While free, these models may have rate limits. 
+• Alternative: You can also use  or  through OpenRouter for free. [2, 5, 6, 7]  
+
+AI can make mistakes, so double-check responses
+
+[1] https://www.youtube.com/watch?v=cq6GGKKZRJE
+[2] https://www.youtube.com/watch?v=GRUjApPqCoE
+[3] https://www.mindstudio.ai/blog/open-router-free-models-claude-code-cost-reduction
+[4] https://icecream23.medium.com/how-to-use-claude-code-for-free-with-openrouter-step-by-step-guide-3544a1049b5a
+[5] https://www.youtube.com/watch?v=DPuZafJ6UEs
+[6] https://www.youtube.com/watch?v=bvw3UDmbhYQ
+[7] https://gauravsohoni.wordpress.com/2026/01/05/how-to-use-claude-code-for-free-with-openrouter-setup-guide/
+Openrouter api key make a api setting and bro add openrouter/free for by default choose itself for best model and bruh add langraph+ langchain + 50+ coding tools for nonstop agent loops analyze + think + reason + web search for find related to project to make max output as max as possible + architect plan + give architect take plan with execute button or edit plan with ai correction + langchain_reasoning_ highly_max_advanced_model + langraph loops with live reasoning multi tasks workflows + async + memory + context +langchain+50+ tools 🌚 and all ide features and live animations and ai also generate and pop any card for questions and query anytime he wants by default with langchain + execute with max time taken but very powerfull than chatgpt and Bro files nahi bana raha chat mai code de raha plan ka execute button not work and ye har task ya project mai khud ki trf se 20+ cheeze khud se daal jaise user ne only bola ki ek snake game in html mai do toh wo bura breakdown kare khud ki trf se max output ki koshish kare khudse colour decide bina bataye live animations and multiples things from itself buttons and bg elements bhut jyada intensive and bruh wo kabhi bhi random question ya quirey ya kuch batane ke liye ui card generate karke khudke ke question ke ya buttons ya text box ya choice choose karne ke liye generate kar sakta hai code likhne ke bhee h mai ya first mai ya last mai pop up karde aur skip ka bhi dede ki fill automatically by ai or skip this step and usko ui card mai khudke hisaab se text + buttons + todos + choose feature and text box with his own questions and bhai wo engine mai recent actions upar dikhe na ki niche jaaye and bhai live streaming nahi ho pa rhi yawr esa hi ki animations chale wo khud tab switch karke aapko bata paaye process bata paaye animations khudke hisaab se live streaming ke sath and bhai agent ko any button generator and ui interaction wo khudse ui main sab kar paaye imports and modules do usse jisse puri chat agent ke haath mai ho wo chat kuch bhi kar paaye and monaco code editor add karo and memory strong karo langchain react agent banao jo claude ko fail karde and langraph use advancely capable and code editor mai bhi chat hogi jo waha msg bhejenge wo main chat mai jaayega chatgpt ke canvas ki trh main chat only for plan and discussion ke liye hai wo codes only code editor mai likhe and jab ye ho tab langraph workflows se animation chale chat ui mai ki studio mai coding kar raha ai ese waise uske hisaab seCreating an advanced AI agent chat involves building a system that goes beyond simple Q&A by using Retrieval Augmented Generation (RAG) to access custom data, employing frameworks like LangChain or LangGraph for logic, and integrating specialized tools (e.g., search, API calls) to solve complex tasks. [1, 2, 3, 4]  
+This video provides a complete course on building advanced AI agents: 
+Steps to Build an Advanced Agent Chat 
+
+1. Define Purpose and Scope: Clearly outline what the agent should do (e.g., customer support, data analysis) and the specific knowledge it needs to operate. 
+2. Select Technology Stack: 
+
+	• Orchestration: LangChain, LangGraph, or AutoGen for agentic workflows. 
+	• Backend: Node.js, Python, or FastAPI. 
+	• LLMs: OpenAI (GPT-4), Anthropic (Claude), or specialized models. 
+	• Frontend: React, Tailwind CSS, or prefabricated tools like Stream Chat. 
+
+3. Implement RAG (Retrieval Augmented Generation): Load specific company data, PDFs, or websites into a vector database to provide context, reducing hallucination. 
+4. Develop Tools and Function Calling: Configure the agent to interact with external systems (e.g., checking SQL databases, sending emails, using calculators) using tool calling capabilities. 
+5. Build Conversation and Decision Logic: Use tools like LangGraph to create iterative loops where the agent can plan, act, observe, and update its context. 
+6. Test and Deploy: Test the agent to refine prompts and tool usage, then deploy on platforms like Vapi for voice, websites, or chat apps. [2, 3, 4, 5, 6, 7, 8, 9, 10]  
+
+This video demonstrates how to create an AI search agent project: 
+Key Components of Advanced Agents 
+
+• Agentic Workflows: Unlike fixed chains, advanced agents use logic to decide which tools to use and in what order. 
+• Memory Management: Maintaining context over long, multi-turn conversations, often managed with state graphs. 
+• Multimodal Capabilities: Integrating image processing, vision models (GPT-4V), or voice for richer interaction. [3, 4, 8, 9, 11]  
+
+For specialized platforms, you can use AgentX for no-code setup or ServiceNow for agent chat with Advanced Work Assignment (AWA). [7, 12, 13]  
+This video shows you how to build a complex AI chat application with agents: 
+
+AI responses may include mistakes.
+
+[1] https://www.youtube.com/watch?v=qc2jrXj6qyU
+[2] https://www.youtube.com/watch?v=B0TJC4lmzEM
+[3] https://www.chatbot.com/blog/how-to-build-an-ai-agent/
+[4] https://www.youtube.com/watch?v=cUC-hyjpNxk
+[5] https://www.youtube.com/watch?v=4Uo2cYcxvJs
+[6] https://vapi.ai/
+[7] https://www.agentx.so/post/how-to-create-an-ai-chat-agent-on-agentx-1-0
+[8] https://www.anthropic.com/engineering/advanced-tool-use
+[9] https://github.com/ashishpatel26/500-AI-Agents-Projects
+[10] https://www.youtube.com/watch?v=HCSPIH3I-vc
+[11] https://biaohao.medium.com/the-agentic-shift-insurance-fnol-agent-shows-the-future-beyond-workflows-a8ea04fc11eb
+[12] https://www.servicenow.com/community/agent-chat-routing-and-sidebar/agent-chat-advanced-work-assignment-awa-complete-workshop/ta-p/2305983
+[13] https://www.servicenow.com/docs/r/conversational-interfaces/agent-chat/ci-idle-chats.html
+
+Add magical ai random chats features with ai automations 100+
