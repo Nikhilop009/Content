@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Aura AR</title>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#030309; overflow:hidden; font-family:'Segoe UI',sans-serif; color:#fff; }
+
+.video-container { position:absolute; inset:0; }
+
+video {
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+    filter:brightness(0.5) contrast(1.1) saturate(0.8);
+    z-index:0;
+}
+
+canvas {
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    transform:scaleX(-1);
+    pointer-events:none;
+}
+
+#bgC  { z-index:1; }
+#fxC  { z-index:3; }
+#ballC{ z-index:4; }
+#handC{ z-index:5; }
+
+#hud {
+    position:absolute; top:18px; left:18px;
+    z-index:10; display:flex; flex-direction:column; gap:12px;
+    pointer-events:none; transition:opacity .4s;
+}
+.panel {
+    background:rgba(10,12,28,0.55);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:12px; padding:12px 18px;
+    font-size:.82rem;
+}
+.row { display:flex; justify-content:space-between; gap:20px; margin-bottom:6px; }
+.row:last-child { margin-bottom:0; }
+.lbl { color:rgba(255,255,255,.5); }
+.val { color:#00ffcc; font-weight:700; }
+
+#hint {
+    position:absolute; bottom:22px; left:50%;
+    transform:translateX(-50%);
+    z-index:10; pointer-events:none;
+    background:rgba(10,12,28,0.55);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:30px; padding:10px 24px;
+    font-size:.8rem; color:rgba(255,255,255,.6);
+    display:flex; gap:20px; white-space:nowrap;
+}
+.hint-item span { color:#00ffcc; }
+
+#themes {
+    position:absolute; top:18px; right:18px;
+    z-index:10; display:flex; gap:8px;
+    background:rgba(10,12,28,0.55);
+    backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:30px; padding:7px;
+}
+.tb {
+    background:transparent; border:1px solid transparent;
+    color:#aaa; padding:6px 14px; border-radius:20px;
+    cursor:pointer; font-size:.78rem; font-weight:600; transition:.25s;
+}
+.tb.active { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); color:#fff; }
+
+#overlay {
+    position:absolute; inset:0; z-index:100;
+    background:rgba(0,0,0,.88);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    backdrop-filter:blur(12px); transition:opacity .5s;
+}
+#overlay h1 { font-size:2rem; font-weight:200; letter-spacing:6px; margin-bottom:10px; }
+#overlay p  { color:#555; margin-bottom:40px; font-size:.9rem; text-align:center; }
+#startBtn {
+    padding:14px 38px; font-size:1.1rem;
+    background:linear-gradient(135deg,#ff00cc,#3333ff);
+    border:none; color:#fff; border-radius:30px;
+    cursor:pointer; font-weight:700; letter-spacing:2px;
+    text-transform:uppercase;
+    box-shadow:0 0 30px rgba(255,0,204,.4);
+    transition:transform .2s, box-shadow .2s;
+}
+#startBtn:hover { transform:scale(1.06); }
+.hidden { opacity:0!important; pointer-events:none!important; }
+</style>
+</head>
+<body>
+
+<div id="overlay">
+    <h1>NEON AURA AR</h1>
+    <p>Camera access required<br>Pinch to grab the ball · Spread fingers to resize</p>
+    <button id="startBtn">Enter Experience</button>
+</div>
+
+<div class="video-container">
+    <video autoplay playsinline></video>
+    <canvas id="bgC"></canvas>
+    <canvas id="fxC"></canvas>
+    <canvas id="ballC"></canvas>
+    <canvas id="handC"></canvas>
+</div>
+
+<div id="hud" class="hidden">
+    <div class="panel">
+        <div class="row"><span class="lbl">Hands</span><span class="val" id="uHands">0</span></div>
+        <div class="row"><span class="lbl">FPS</span><span class="val" id="uFps">0</span></div>
+    </div>
+    <div class="panel">
+        <div class="row"><span class="lbl">Gesture</span><span class="val" id="uGest">—</span></div>
+        <div class="row"><span class="lbl">Ball radius</span><span class="val" id="uSize">55px</span></div>
+    </div>
+</div>
+
+<div id="themes" class="hidden">
+    <button class="tb active" data-t="Neon">Neon</button>
+    <button class="tb" data-t="Cyber">Cyber</button>
+    <button class="tb" data-t="Lava">Lava</button>
+    <button class="tb" data-t="Ocean">Ocean</button>
+    <button class="tb" data-t="Galaxy">Galaxy</button>
+</div>
+
+<div id="hint" class="hidden">
+    <div class="hint-item">✊ <span>Pinch</span> = Grab &amp; drag</div>
+    <div class="hint-item">↔ <span>Open/close fingers</span> = Resize</div>
+</div>
+
+<script>
+/* ── CANVAS SETUP ── */
+const vid   = document.querySelector('video');
+const bgC   = document.getElementById('bgC');
+const fxC   = document.getElementById('fxC');
+const ballC = document.getElementById('ballC');
+const handC = document.getElementById('handC');
+const bgX   = bgC.getContext('2d');
+const fxX   = fxC.getContext('2d');
+const ballX = ballC.getContext('2d');
+const handX = handC.getContext('2d');
+
+let W = innerWidth, H = innerHeight;
+
+function resize() {
+    W = innerWidth; H = innerHeight;
+    [bgC,fxC,ballC,handC].forEach(c=>{ c.width=W; c.height=H; });
+    initMatrix();
+    ball.x = W/2; ball.y = H*0.45;
+}
+addEventListener('resize', resize);
+
+/* ── THEMES ── */
+let theme = 'Neon';
+const THEMES = {
+    Neon:   (t,i,n) => `hsl(${(t*60+i*(360/n))%360},100%,65%)`,
+    Cyber:  (t,i,n) => i%2===0?'#ff003c':'#00f0ff',
+    Lava:   (t,i,n) => `hsl(${(i*8)%40},100%,${52+Math.sin(t)*8}%)`,
+    Ocean:  (t,i,n) => `hsl(${185+i*18},100%,62%)`,
+    Galaxy: (t,i,n) => `hsl(${255+Math.sin(t*1.5+i)*50},100%,68%)`
+};
+const col = (t,i,n=5) => THEMES[theme](t,i,n);
+
+document.querySelectorAll('.tb').forEach(b=>b.addEventListener('click',e=>{
+    document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));
+    e.target.classList.add('active');
+    theme = e.target.dataset.t;
+}));
+
+/* ── MATRIX RAIN ── */
+const FS = 15;
+let matCols=[], colCnt=0, mFrame=0;
+function initMatrix(){
+    colCnt = Math.floor(W/FS);
+    matCols = Array.from({length:colCnt},()=>Math.random()*(H/FS));
+}
+function drawMatrix(t, speed){
+    mFrame++;
+    if(mFrame%2!==0) return; // every other frame = 2x faster
+    bgX.globalCompositeOperation='destination-out';
+    bgX.fillStyle=`rgba(0,0,0,${0.1+Math.min(speed*8,0.3)})`;
+    bgX.fillRect(0,0,W,H);
+    bgX.globalCompositeOperation='source-over';
+    bgX.font=FS+'px monospace';
+    const sp=1+speed*50;
+    for(let i=0;i<colCnt;i++){
+        if(Math.random()>0.97){
+            bgX.fillStyle=col(t,i%5);
+            bgX.fillText(String.fromCharCode(0x30A0+Math.random()*96),i*FS,matCols[i]*FS);
+        }
+        matCols[i]+=Math.random()*sp;
+        if(matCols[i]*FS>H&&Math.random()>0.92) matCols[i]=0;
+    }
+}
+
+/* ── PARTICLES (capped) ── */
+const MAX_P=50;
+let particles=[];
+function spawnP(x,y,color,n=2){
+    for(let i=0;i<n&&particles.length<MAX_P;i++)
+        particles.push({x,y,vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5-1,life:1,s:Math.random()*2+.5,color});
+}
+function drawParticles(){
+    for(let i=particles.length-1;i>=0;i--){
+        const p=particles[i];
+        p.x+=p.vx; p.y+=p.vy; p.vy+=0.08; p.life-=0.025;
+        if(p.life<=0){particles.splice(i,1);continue;}
+        fxX.globalAlpha=p.life;
+        fxX.fillStyle=p.color;
+        fxX.beginPath();
+        fxX.arc(p.x,p.y,p.s,0,Math.PI*2);
+        fxX.fill();
+    }
+    fxX.globalAlpha=1;
+}
+
+/* ── RIPPLES ── */
+let ripples=[];
+function spawnRipple(x,y,color){
+    ripples.push({x,y,r:0,maxR:100+Math.random()*80,life:1,color});
+}
+function drawRipples(){
+    for(let i=ripples.length-1;i>=0;i--){
+        const r=ripples[i];
+        r.r+=(r.maxR-r.r)*0.12; r.life-=0.035;
+        if(r.life<=0){ripples.splice(i,1);continue;}
+        fxX.beginPath();
+        fxX.arc(r.x,r.y,r.r,0,Math.PI*2);
+        fxX.strokeStyle=r.color;
+        fxX.lineWidth=3*r.life;
+        fxX.globalAlpha=r.life*0.75;
+        fxX.stroke();
+    }
+    fxX.globalAlpha=1;
+}
+
+/* ── BALL ── */
+const ball={
+    x:0, y:0, vx:0, vy:0,
+    r:55, targetR:55,
+    grabbed:false,
+    hue:0
+};
+const BALL_MIN=18, BALL_MAX=140;
+const FLOAT_SPRING=0.035, DAMPING=0.88, GRAVITY=0.15;
+
+function updateBall(grabbed,gx,gy){
+    ball.hue=(ball.hue+0.7)%360;
+    ball.r+=(ball.targetR-ball.r)*0.1;
+    if(grabbed){
+        ball.vx+=(gx-ball.x)*0.32; ball.vy+=(gy-ball.y)*0.32;
+        ball.vx*=0.55; ball.vy*=0.55;
+    } else {
+        const floatY=H*0.42;
+        ball.vy+=GRAVITY+(floatY-ball.y)*FLOAT_SPRING;
+        ball.vx*=DAMPING; ball.vy*=DAMPING;
+    }
+    ball.x+=ball.vx; ball.y+=ball.vy;
+    const R=ball.r;
+    if(ball.x-R<0){ball.x=R;ball.vx*=-0.4;}
+    if(ball.x+R>W){ball.x=W-R;ball.vx*=-0.4;}
+    if(ball.y-R<0){ball.y=R;ball.vy*=-0.4;}
+    if(ball.y+R>H){ball.y=H-R;ball.vy*=-0.4;}
+}
+
+function drawBall(t){
+    ballX.clearRect(0,0,W,H);
+    const {x,y,r,hue,grabbed}=ball;
+
+    // Outer aura (cheap, no shadowBlur)
+    [[r*1.9,0.06],[r*1.5,0.11],[r*1.2,0.18]].forEach(([rad,a])=>{
+        const g=ballX.createRadialGradient(x,y,r*0.6,x,y,rad);
+        g.addColorStop(0,`hsla(${hue},100%,65%,${a})`);
+        g.addColorStop(1,'transparent');
+        ballX.beginPath(); ballX.arc(x,y,rad,0,Math.PI*2);
+        ballX.fillStyle=g; ballX.fill();
+    });
+
+    // Body
+    const body=ballX.createRadialGradient(x-r*.3,y-r*.3,r*.04,x,y,r);
+    body.addColorStop(0,  `hsla(${(hue+60)%360},100%,92%,0.95)`);
+    body.addColorStop(0.4,`hsla(${hue},100%,65%,0.9)`);
+    body.addColorStop(1,  `hsla(${(hue+200)%360},100%,30%,0.85)`);
+    ballX.beginPath(); ballX.arc(x,y,r,0,Math.PI*2);
+    ballX.fillStyle=body; ballX.fill();
+
+    // Gloss
+    const gloss=ballX.createRadialGradient(x-r*.35,y-r*.4,0,x-r*.2,y-r*.2,r*.6);
+    gloss.addColorStop(0,'rgba(255,255,255,0.55)');
+    gloss.addColorStop(0.5,'rgba(255,255,255,0.06)');
+    gloss.addColorStop(1,'transparent');
+    ballX.beginPath(); ballX.arc(x,y,r,0,Math.PI*2);
+    ballX.fillStyle=gloss; ballX.fill();
+
+    // Rim
+    ballX.beginPath(); ballX.arc(x,y,r,0,Math.PI*2);
+    ballX.strokeStyle=`hsla(${hue},100%,80%,0.55)`;
+    ballX.lineWidth=1.5; ballX.stroke();
+
+    // Orbit rings
+    [[t*.65,1,0.35,(hue+120)%360],[-t*.45,0.28,1,(hue+240)%360]].forEach(([angle,sx,sy,h])=>{
+        ballX.save();
+        ballX.translate(x,y); ballX.rotate(angle);
+        ballX.scale(sx,sy);
+        ballX.beginPath(); ballX.arc(0,0,r*1.38,0,Math.PI*2);
+        ballX.strokeStyle=`hsla(${h},100%,70%,0.4)`;
+        ballX.lineWidth=1.8; ballX.stroke();
+        ballX.restore();
+    });
+
+    // Grabbed dashed ring
+    if(grabbed){
+        ballX.beginPath(); ballX.arc(x,y,r+5,0,Math.PI*2);
+        ballX.strokeStyle='rgba(255,255,255,0.45)';
+        ballX.lineWidth=2; ballX.setLineDash([7,5]); ballX.stroke();
+        ballX.setLineDash([]);
+    }
+
+    // Floating particles off the ball surface
+    if(Math.random()>0.82){
+        const angle=Math.random()*Math.PI*2;
+        spawnP(x+Math.cos(angle)*r,y+Math.sin(angle)*r,`hsl(${hue},100%,70%)`,1);
+    }
+}
+
+/* ── HAND RENDER ── */
+const TIPS=[4,8,12,16,20];
+function mp(lm){return{x:lm.x*W,y:lm.y*H};}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+
+function drawHands(hands,t){
+    handX.clearRect(0,0,W,H);
+    if(!hands.length) return;
+    handX.globalCompositeOperation='screen';
+
+    hands.forEach((hand,hi)=>{
+        const c=col(t,hi,2);
+        // Skeleton
+        if(window.HAND_CONNECTIONS){
+            handX.beginPath();
+            HAND_CONNECTIONS.forEach(([a,b])=>{
+                const pa=mp(hand[a]),pb=mp(hand[b]);
+                handX.moveTo(pa.x,pa.y); handX.lineTo(pb.x,pb.y);
+            });
+            handX.strokeStyle=c; handX.lineWidth=1.5;
+            handX.globalAlpha=0.65; handX.stroke(); handX.globalAlpha=1;
+        }
+        // Fingertips
+        TIPS.forEach((ti,idx)=>{
+            const pt=mp(hand[ti]);
+            const tc=col(t,idx,5);
+            handX.beginPath(); handX.arc(pt.x,pt.y,9,0,Math.PI*2);
+            handX.fillStyle=tc; handX.globalAlpha=0.15; handX.fill();
+            handX.beginPath(); handX.arc(pt.x,pt.y,3.5,0,Math.PI*2);
+            handX.fillStyle='#fff'; handX.globalAlpha=0.9; handX.fill();
+            handX.globalAlpha=1;
+            if(Math.random()>0.78) spawnP(pt.x,pt.y,tc,1);
+        });
+    });
+
+    // Cross-hand beam
+    if(hands.length>=2){
+        const i1=mp(hands[0][8]),i2=mp(hands[1][8]);
+        const d=dist(i1,i2);
+        if(d<230){
+            const alpha=(1-d/230);
+            const g=handX.createLinearGradient(i1.x,i1.y,i2.x,i2.y);
+            g.addColorStop(0,col(t,0,5)); g.addColorStop(1,col(t,3,5));
+            handX.beginPath(); handX.moveTo(i1.x,i1.y); handX.lineTo(i2.x,i2.y);
+            handX.strokeStyle=g; handX.lineWidth=6*alpha;
+            handX.globalAlpha=alpha*0.8; handX.stroke(); handX.globalAlpha=1;
+        }
+    }
+    handX.globalCompositeOperation='source-over';
+}
+
+/* ── HAND LOGIC ── */
+let handData=[], handSpeed=0, prevLMs=[];
+const hPinch=[false,false];
+let resizeRef=null, resizeHandIdx=-1;
+
+function processHands(t){
+    const h=handData;
+    let grabbed=false,gx=0,gy=0,gestLabel='—';
+
+    if(!h.length){
+        hPinch[0]=hPinch[1]=false; resizeRef=null;
+        document.getElementById('uGest').innerText='—';
+        document.getElementById('uSize').innerText=Math.round(ball.r)+'px';
+        updateBall(false,0,0); return;
+    }
+
+    h.forEach((hand,hi)=>{
+        const thumb=mp(hand[4]), idx=mp(hand[8]);
+        const pd=dist(thumb,idx);
+        const mid={x:(thumb.x+idx.x)/2,y:(thumb.y+idx.y)/2};
+        const pinching=pd<38;
+        const nearBall=dist(mid,ball)<ball.r+35;
+
+        if(pinching&&(nearBall||hPinch[hi])){
+            if(!hPinch[hi]&&nearBall){
+                spawnRipple(ball.x,ball.y,col(t,hi,2));
+                triggerZap();
+            }
+            grabbed=true; gx=mid.x; gy=mid.y;
+            ball.grabbed=true; gestLabel='GRABBED ✊';
+            resizeRef=null; resizeHandIdx=-1;
+        }
+        hPinch[hi]=pinching;
+    });
+
+    // Resize — only when not grabbed
+    if(!grabbed){
+        ball.grabbed=false;
+        h.forEach((hand,hi)=>{
+            if(hPinch[hi]) return; // pinching = grabbing, not resizing
+            const thumb=mp(hand[4]), idx=mp(hand[8]);
+            const spread=dist(thumb,idx);
+            const palm=mp(hand[0]);
+            const close=dist(palm,ball)<ball.r*2.8+80;
+            if(close){
+                if(resizeRef===null||resizeHandIdx!==hi){
+                    resizeRef={dist:spread,radius:ball.r};
+                    resizeHandIdx=hi;
+                }
+                const factor=spread/Math.max(resizeRef.dist,8);
+                ball.targetR=Math.min(BALL_MAX,Math.max(BALL_MIN,resizeRef.radius*factor));
+                gestLabel=spread>resizeRef.dist?'BIGGER ↔':'SMALLER ↔';
+            }
+        });
+        if(!h.some((_,hi)=>!hPinch[hi]&&dist(mp(h[hi]?.[0]||h[0][0]),ball)<ball.r*2.8+80)){
+            resizeRef=null;
+        }
+    } else { gestLabel='GRABBED ✊'; }
+
+    updateBall(grabbed,gx,gy);
+    document.getElementById('uGest').innerText=gestLabel;
+    document.getElementById('uSize').innerText=Math.round(ball.r)+'px';
+}
+
+/* ── AUDIO ── */
+let audioCtx,humOsc,humGain;
+function initAudio(){
+    try{
+        audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+        humOsc=audioCtx.createOscillator(); humGain=audioCtx.createGain();
+        humOsc.type='sine'; humOsc.frequency.value=90;
+        humGain.gain.value=0;
+        humOsc.connect(humGain); humGain.connect(audioCtx.destination);
+        humOsc.start();
+    }catch(e){}
+}
+function triggerZap(){
+    if(!audioCtx)return;
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(650,audioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(50,audioCtx.currentTime+0.12);
+    g.gain.setValueAtTime(0.3,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.12);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+0.15);
+}
+
+/* ── MEDIAPIPE ── */
+function initMP(){
+    const hands=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+    hands.setOptions({
+        maxNumHands:2,
+        modelComplexity:0,          // lighter = smoother
+        minDetectionConfidence:0.65,
+        minTrackingConfidence:0.5
+    });
+    hands.onResults(results=>{
+        const det=results.multiHandLandmarks||[];
+        document.getElementById('uHands').innerText=det.length;
+        if(det.length&&prevLMs.length===det.length){
+            let sum=0;
+            det.forEach((hand,hi)=>hand.forEach((lm,li)=>{
+                if(prevLMs[hi]?.[li]) sum+=Math.hypot(lm.x-prevLMs[hi][li].x,lm.y-prevLMs[hi][li].y);
+            }));
+            const raw=sum/(det.length*21);
+            handSpeed=handSpeed*0.8+raw*0.2;
+        } else { handSpeed*=0.9; }
+        prevLMs=det.map(h=>h.map(lm=>({x:lm.x,y:lm.y})));
+        handData=det;
+    });
+    const cam=new Camera(vid,{
+        onFrame:async()=>await hands.send({image:vid}),
+        width:960, height:540
+    });
+    cam.start();
+}
+
+/* ── RENDER LOOP ── */
+let T=0,last=performance.now(),fpsN=0,fpsT=performance.now();
+
+function loop(now){
+    requestAnimationFrame(loop);
+    const dt=Math.min((now-last)/1000,0.05);
+    last=now; T+=dt; fpsN++;
+    if(now>fpsT+1000){
+        document.getElementById('uFps').innerText=fpsN;
+        fpsN=0; fpsT=now;
+    }
+    drawMatrix(T,handSpeed);
+
+    fxX.globalCompositeOperation='destination-out';
+    fxX.fillStyle='rgba(0,0,0,0.22)';
+    fxX.fillRect(0,0,W,H);
+    fxX.globalCompositeOperation='source-over';
+
+    drawParticles();
+    drawRipples();
+    processHands(T);
+    drawBall(T);
+    drawHands(handData,T);
+}
+
+/* ── START ── */
+document.getElementById('startBtn').addEventListener('click',()=>{
+    document.getElementById('overlay').classList.add('hidden');
+    ['hud','themes','hint'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
+    resize(); // set initial ball position
+    initAudio(); initMP();
+    requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
